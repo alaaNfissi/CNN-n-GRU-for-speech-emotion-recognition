@@ -65,8 +65,8 @@ In this paper, we introduce CNN-n-GRU, a novel end-to-end (E2E) architecture for
 
 
 ### Built With
-* [![Anaconda Navigator][anaconda.com]][anaconda-url]
-* [![React][React.js]][React-url]
+* [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
+* [![Made withJupyter](https://img.shields.io/badge/Made%20with-Jupyter-orange?style=for-the-badge&logo=Jupyter)](https://jupyter.org/try)
 * [![Vue][Vue.js]][Vue-url]
 * [![Angular][Angular.io]][Angular-url]
 * [![Svelte][Svelte.dev]][Svelte-url]
