@@ -215,7 +215,8 @@ Use this space to list resources you find helpful and would like to give credit 
 [linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/screenshot.png
 
-[anaconda.com]: https://docs.anaconda.com/_images/Navigator_Launchpad_icon.png
+
+[anaconda.com]: https://anaconda.org/conda-forge/mlconjug/badges/version.svg)](https://anaconda.org/conda-forge/mlconjug
 [anaconda-url]: https://www.anaconda.com/
 
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
