@@ -15,8 +15,13 @@
     <br />
    </p>
     <!-- <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition"><strong>Explore the docs »</strong></a> -->
+</div>
+   
+<div align="center">
     [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](/#readme "Go to project documentation")
- 
+</div>
+
+<div align="center">
     <p align="center">
     <br />
     <br />
