@@ -240,9 +240,9 @@ to the authors. See `LICENSE.md` for the full license text.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+Your Name - [@LinkedIn](https://www.linkedin.com/in/alaa-nfissi/) - alaa.nfissi@gmail.com
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
