@@ -133,18 +133,23 @@ The recommended way to set up your environment is through the
 provides the `conda` package manager.
 Anaconda can be installed in your user directory and does not interfere with
 the system Python installation.
-The required dependencies are specified in the file `environment.yml`.
+The required dependencies are specified in the file `requirements.txt`.
 
 We use `conda` virtual environments to manage the project dependencies in
 isolation.
 Thus, you can install our dependencies without causing conflicts with your
 setup (even with different Python versions).
 
-Run the following command in the repository folder (where `environment.yml`
-is located) to create a separate environment and install all required
+Run the following command tto create an `ser-env` environment to create a separate environment and install all required
 dependencies in it:
 
-    conda env create
+    conda create --name ser-env
+  
+    conda activate ser-env
+  
+    conda install pip
+  
+    pip install -r requirements.txt
 
 </p>
 
