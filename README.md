@@ -144,7 +144,7 @@ Run the following command to create an `ser-env` environment to create a separat
 
     conda create --name ser-env
 
-Activate the environment, this will enable the environment for your current terminal session. Any subsequent commands will use software that is installed in the environment.:
+Activate the environment, this will enable the it for your current terminal session. Any subsequent commands will use software that is installed in the environment:
 
     conda activate ser-env
   
