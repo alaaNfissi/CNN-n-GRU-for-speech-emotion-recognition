@@ -25,8 +25,6 @@
 
 <div align="center">
     <p align="center">
-    <br />
-    <br />
     ·
     <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition">Report Bug</a>
     ·
