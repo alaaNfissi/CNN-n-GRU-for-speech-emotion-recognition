@@ -174,7 +174,7 @@ repository top level and running:
 
 This will start the server and open your default web browser to the Jupyter
 interface. In the page, go into the `Data_exploration` folder and select the
-`data_exploration.ipynb` notebook to view/run.
+`data_exploration.ipynb` notebook to view/run. Make sure to specify the correct datasets paths on your own machine as described in the notebook.
 
 The notebook is divided into cells (some have text while other have code).
 Each cell can be executed using `Shift + Enter`.
