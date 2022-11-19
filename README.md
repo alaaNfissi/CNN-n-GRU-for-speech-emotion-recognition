@@ -68,7 +68,9 @@
 <!-- ABSTRACT -->
 ## Abstract
 <div align="center">
+  
 ![ser-approaches][ser-approaches]
+  
 </div> 
 
 <p align="justify"> Speech emotion recognition is challenging as human emotion is very ambiguous, making it challenging to distinguish. Often, it can only be detected intermittently across a long sentence, besides speech data with emotional categorization is typically rare.
