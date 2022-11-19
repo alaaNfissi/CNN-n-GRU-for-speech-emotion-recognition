@@ -117,11 +117,10 @@ You can download a copy of all the files in this repository by cloning the
 or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/archive/refs/heads/main.zip).
 
 ### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+To run this project you need to do the following steps:
+* python
   ```sh
-  npm install npm@latest -g
+    sudo apt install python3
   ```
 
 ### Installation
