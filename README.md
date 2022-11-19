@@ -14,7 +14,7 @@
     This paper has been submitted for publication in IEEE Transactions on Emerging Topics in Computational Intelligence.
     <br />
    </p>
-    <!-- <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition"><strong>Explore the docs »</strong></a> -->
+   <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition"><strong>Explore the docs »</strong></a>
 </div>
    
 <div align="center">
