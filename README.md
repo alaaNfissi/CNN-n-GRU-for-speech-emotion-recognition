@@ -97,12 +97,14 @@ In this paper, we introduce CNN-n-GRU, a novel end-to-end (E2E) architecture for
 <!-- GETTING STARTED -->
 ## Getting Started
 <p align="justify">
+  
 All source code used to generate the results and figures in the paper are in
 the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders.
 The calculations and figure generation are all run inside
 [Jupyter notebooks](http://jupyter.org/).
 The data preprocessing used in this study is provided in `Data_exploration` folder.
 See the `README.md` files in each directory for a full description.
+  
 </p>
 
 ### Prerequisites
