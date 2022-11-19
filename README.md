@@ -107,6 +107,15 @@ See the `README.md` files in each directory for a full description.
   
 </p>
 
+### Getting the code
+
+You can download a copy of all the files in this repository by cloning the
+[git](https://git-scm.com/) repository:
+
+    git clone https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition.git
+
+or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/archive/refs/heads/main.zip).
+
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
