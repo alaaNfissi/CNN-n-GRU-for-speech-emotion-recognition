@@ -5,7 +5,7 @@
 
 <div align="center">
   <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition">
-    <img src="images/ser_approaches_old" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Exploiting CNNs and GRUs for efficient end-to-end speech emotion recognition approach from raw waveform signal</h3>
