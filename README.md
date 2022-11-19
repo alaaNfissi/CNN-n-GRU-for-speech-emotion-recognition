@@ -63,7 +63,13 @@
   </ol>
 </details>
 
-
+<div align="center">
+  
+![ser-approaches][ser-approaches]
+  
+*SER appraoches*
+  
+</div> 
 
 <!-- ABSTRACT -->
 ## Abstract
