@@ -71,7 +71,7 @@
   
 ![ser-approaches][ser-approaches]
   
-  SER appraoches
+*SER appraoches*
   
 </div> 
 
