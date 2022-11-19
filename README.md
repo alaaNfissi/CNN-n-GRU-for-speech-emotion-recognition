@@ -162,6 +162,10 @@ Install all required dependencies in it:
 
 <p align="center">
   
+First, you need to download IEMOCAP and TESS datasets:
+  * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
+  * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
+  
 To be able to explore the data you need to execute the Jupyter notebook that prepares `csv` files needed for the experiments.
 To do this, you must first start the notebook server by going into the
 repository top level and running:
