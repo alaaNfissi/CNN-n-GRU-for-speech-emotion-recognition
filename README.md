@@ -118,6 +118,8 @@ or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-e
 
 ### Dependencies
 
+<p align="center">
+
 You'll need a working Python environment to run the code.
 The recommended way to set up your environment is through the
 [Anaconda Python distribution](https://www.anaconda.com/download/) which
@@ -136,6 +138,8 @@ is located) to create a separate environment and install all required
 dependencies in it:
 
     conda env create
+
+</p>
 
 ### Installation
 
