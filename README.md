@@ -116,12 +116,26 @@ You can download a copy of all the files in this repository by cloning the
 
 or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/archive/refs/heads/main.zip).
 
-### Prerequisites
-To run this project you need to do the following steps:
-* python
-  ```sh
-    sudo apt install python3
-  ```
+### Dependencies
+
+You'll need a working Python environment to run the code.
+The recommended way to set up your environment is through the
+[Anaconda Python distribution](https://www.anaconda.com/download/) which
+provides the `conda` package manager.
+Anaconda can be installed in your user directory and does not interfere with
+the system Python installation.
+The required dependencies are specified in the file `environment.yml`.
+
+We use `conda` virtual environments to manage the project dependencies in
+isolation.
+Thus, you can install our dependencies without causing conflicts with your
+setup (even with different Python versions).
+
+Run the following command in the repository folder (where `environment.yml`
+is located) to create a separate environment and install all required
+dependencies in it:
+
+    conda env create
 
 ### Installation
 
