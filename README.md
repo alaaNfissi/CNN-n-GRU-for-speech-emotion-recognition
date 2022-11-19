@@ -158,7 +158,27 @@ Install all required dependencies in it:
 
 </p>
 
-### Installation
+### Reproducing the results
+
+<p align="center">
+  
+To be able to explore the data you need to execute the Jupyter notebook that prepares `csv` files needed for the experiments.
+To do this, you must first start the notebook server by going into the
+repository top level and running:
+
+    jupyter notebook
+
+This will start the server and open your default web browser to the Jupyter
+interface. In the page, go into the `Data_exploration` folder and select the
+`data_exploration.ipynb` notebook to view/run.
+
+The notebook is divided into cells (some have text while other have code).
+Each cell can be executed using `Shift + Enter`.
+Executing text cells does nothing and executing code cells runs the code
+and produces it's output.
+To execute the whole notebook, run all cells in order.
+
+</p>
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
