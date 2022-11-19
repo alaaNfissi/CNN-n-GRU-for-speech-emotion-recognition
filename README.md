@@ -2,6 +2,7 @@
 
 <!-- PROJECT LOGO -->
 <br />
+
 <div align="center">
   <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
@@ -12,8 +13,14 @@
   <p align="center">
     This paper has been submitted for publication in IEEE Transactions on Emerging Topics in Computational Intelligence.
     <br />
+   </p>
+  </div>
     <!-- <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition"><strong>Explore the docs »</strong></a> -->
-    [![View - Documentation] (https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)] (https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/#readme)
+    
+[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](/docs/#readme "Go to project documentation")
+
+<div align="center">
+    <p align="center">
     <br />
     <br />
     ·
