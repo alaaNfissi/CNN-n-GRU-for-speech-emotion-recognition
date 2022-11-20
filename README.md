@@ -29,9 +29,9 @@
 <div align="center">
     <p align="center">
     ·
-    <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition">Report Bug</a>
+    <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/issues">Report Bug</a>
     ·
-    <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition">Request Feature</a>
+    <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition/issues">Request Feature</a>
   </p>
 </div>
 
@@ -205,8 +205,7 @@ python iemocap_cnn_3_gru.py
 ## Results
 <p align="center">
   
-We implemented the proposed architecture CNN-n-GRU in 60
-four versions, with n = 3, 5, 11, and 18.
+We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3, 5, 11, and 18.
   
 </p>
 
