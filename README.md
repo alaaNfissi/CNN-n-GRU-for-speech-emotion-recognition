@@ -206,7 +206,14 @@ python iemocap_cnn_3_gru.py
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
 :-----------------------------------------------------------------:|:-----------------------------:
-![](images/iemocap_cnn18gru_acc.png)  |  ![](images/iemocap_cnn18gru_confusion_matrix_1.png)
+![iemocap_cnn18gru_acc](images/iemocap_cnn18gru_acc.png)  |  ![iemocap_cnn18gru_confusion_matrix_1](images/iemocap_cnn18gru_confusion_matrix_1.png)
+
+
+### On TESS dataset
+
+CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
+:-----------------------------------------------------------------:|:-----------------------------:
+![cnn18gru_acc](images/cnn18gru_acc.png)  |  ![cnn18gru_confusion_matrix_1](images/cnn18gru_confusion_matrix.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
