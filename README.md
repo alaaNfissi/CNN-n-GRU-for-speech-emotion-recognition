@@ -156,6 +156,7 @@ Install all required dependencies in it:
 ```sh
     pip install -r requirements.txt
 ```
+
 </p>
 
 ### Reproducing the results
@@ -187,6 +188,7 @@ To execute the whole notebook, run all cells in order.
 ```sh  
 python iemocap_cnn_3_gru.py
 ```
+  
   _You can do the same thing for the TESS dataset by going to the `CNN-n-GRU_IEMOCAP` and runing one of the python files._
 
 
@@ -202,15 +204,19 @@ python iemocap_cnn_3_gru.py
 
 ## Results
 <p align="center">
+  
 We implemented the proposed architecture CNN-n-GRU in 60
 four versions, with n = 3, 5, 11, and 18.
+  
 </p>
 
 ### On IEMOCAP dataset
 <p align="center">
+  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches 81.3% accuracy and 80.9% F1-score on the IEMOCAP dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.
+  
 </p>
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
@@ -220,9 +226,11 @@ CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU
 
 ### On TESS dataset
 <p align="center">
+  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches  99.2% accuracy and 99% F1-score on the TESS dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.
+  
 </p>
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
@@ -232,7 +240,9 @@ CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <p align="center">
+  
 _For more detailed experiments and results you can read the paper._
+  
 </p>
 
 
