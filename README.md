@@ -169,9 +169,9 @@ Install all required dependencies in it:
 2. To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
 To do this, you must first start the notebook server by going into the
 repository top level and running:
-
+```sh 
     jupyter notebook
-
+```
 This will start the server and open your default web browser to the Jupyter
 interface. In the page, go into the `Data_exploration` folder and select the
 `data_exploration.ipynb` notebook to view/run. Make sure to specify the correct datasets paths on your own machine as described in the notebook.
@@ -182,10 +182,11 @@ Executing text cells does nothing and executing code cells runs the code
 and produces it's output.
 To execute the whole notebook, run all cells in order.
 
-3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
-  
+3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was
+  activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
+```sh  
 python iemocap_cnn_3_gru.py
-  
+```
 
 
 </p>
