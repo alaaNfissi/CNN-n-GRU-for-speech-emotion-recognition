@@ -1,206 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+from utils import *
+from models import CNN5GRU
 
 
-import os
-from functools import partial
+data = load_data('TESS_dataset.csv')
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchaudio
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import IPython.display as ipd
-from tqdm.notebook import tqdm
-import math
-from sklearn.metrics import confusion_matrix
-import seaborn as sn
-torch.manual_seed(0)
-from ray import tune
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler
-import random
-
-random.seed(1234)
-
-
-# In[2]:
-
-tess_folder = '/home/alaa/Downloads/Concordia/TÉLUQ/ser/Explo_1/Ph.D/CNN-n-GRU-for-speech-emotion-recognition'
-tess_experiments_folder = '/home/alaa/Downloads/Concordia/TÉLUQ/ser/Explo_1/Ph.D/CNN-n-GRU-for-speech-emotion-recognition/CNN-n-GRU_TESS/tess_experiments'
-
-
-class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, paths, labels):
-        self.files = paths
-        self.labels = labels
-        
-    def __getitem__(self, item):
-        file = self.files[item]
-        label = self.labels[item]
-        file, sampling_rate = torchaudio.load(file)
-        return file, sampling_rate, label
-    
-    def __len__(self):
-        return len(self.files)
-
-
-# In[3]:
-
-
-def get_dataset_partitions_pd(df, train_split=0.8, val_split=0.1, test_split=0.1, target_variable=None):
-    assert (train_split + test_split + val_split) == 1
-    
-    # Only allows for equal validation and test splits
-    assert val_split == test_split 
-
-    # Shuffle
-    df_sample = df.sample(frac=1, random_state=42)
-
-    # Specify seed to always have the same split distribution between runs
-    # If target variable is provided, generate stratified sets
-    if target_variable is not None:
-        grouped_df = df_sample.groupby(target_variable)
-        arr_list = [np.split(g, [int(train_split * len(g)), int((1 - val_split) * len(g))]) for i, g in grouped_df]
-
-        train_ds = pd.concat([t[0] for t in arr_list])
-        val_ds = pd.concat([t[1] for t in arr_list])
-        test_ds = pd.concat([v[2] for v in arr_list])
-
-    else:
-        indices_or_sections = [int(train_split * len(df)), int((1 - val_split) * len(df))]
-        train_ds, val_ds, test_ds = np.split(df_sample, indices_or_sections)
-    
-    return train_ds.reset_index(drop=True), val_ds.reset_index(drop=True), test_ds.reset_index(drop=True)
-
-
-# In[4]:
-
-
-def transform_data(data):
-    data_dir = os.path.abspath(tess_folder+'/TESS')
-    path_lst = []
-    for i in data['path']:
-        path = data_dir+ '/' + '/'.join(i.split('/')[9:])
-        waveform, sampling_rate = torchaudio.load(i)
-        waveform = waveform if waveform.shape[0] == 1 else waveform[0].unsqueeze(0)
-        sample_rate = 16000
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        torchaudio.save(path, waveform, sample_rate)
-        path_lst.append(path)
-    data = pd.DataFrame({'label':data.label, 'path':path_lst})
-    return data
-
-
-# In[5]:
-
-
-def load_data(path):
-    data = pd.read_csv(path)
-    data = data[data['source'] == 'TESS'].reset_index()
-    del data['source']
-    data.rename(columns={'labels':'label'}, inplace=True)
-    data['label'] = [i.split('_')[1] for i in data['label']]
-    return transform_data(data)
-
-def init_data_sets(data):
-    train_ds, test_ds, val_ds  = get_dataset_partitions_pd(data,train_split=0.8, val_split=0.1, test_split=0.1, target_variable='label')
-    train_set = MyDataset(train_ds['path'], train_ds['label'])
-    validation_set = MyDataset(val_ds['path'], val_ds['label'])
-    test_set = MyDataset(test_ds['path'], test_ds['label'])
-    return train_set, validation_set, test_set
-
-
-# In[6]:
-
-
-data = load_data('/home/alaa/Downloads/Concordia/TÉLUQ/ser/Explo_1/Ph.D/CNN-n-GRU-for-speech-emotion-recognition/Data_exploration/TESS_dataset.csv')
-
-# In[7]:
+waveform_train, sample_rate = torchaudio.load(data['path'][0])
+new_sr = 16000
+transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sr)
+transformed = transform(waveform_train)
 
 wordclasses = sorted(list(data.label.unique()))
-
-
-# In[10]:
-
-
-class CNN5GRU(nn.Module):
-    def __init__(self, n_input, hidden_dim, n_layers, n_output=len(wordclasses), stride=4, n_channel=5):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.n_layers = n_layers
-        
-        self.conv1 = nn.Conv1d(n_input, n_channel, kernel_size=160, stride=stride)
-        self.bn1 = nn.BatchNorm1d(n_channel)
-        self.relu1 = nn.LeakyReLU()
-        
-        self.pool1 = nn.MaxPool1d(4)
-        
-        self.conv2 = nn.Conv1d(n_channel, n_channel, kernel_size=3,stride=1,padding=1)
-        self.bn2 = nn.BatchNorm1d(n_channel)
-        self.relu2 = nn.LeakyReLU()
-        
-        self.pool2 = nn.MaxPool1d(4)
-        
-        self.conv3 = nn.Conv1d(n_channel, 2 * n_channel, kernel_size=3,stride=1,padding=1)
-        self.bn3 = nn.BatchNorm1d(2 * n_channel)
-        self.relu3 = nn.LeakyReLU()
-        
-        self.pool3 = nn.MaxPool1d(4)
-        
-        self.conv4 = nn.Conv1d(2 * n_channel, 4 * n_channel, kernel_size=3,stride=1,padding=1)
-        self.bn4 = nn.BatchNorm1d(4 * n_channel)
-        self.relu4 = nn.LeakyReLU()
-        
-        self.pool4 = nn.MaxPool1d(4)
-        
-        self.fc1 = nn.Linear(4 * n_channel, 2*n_channel)
-        self.relu5 = nn.LeakyReLU()
-        
-        self.gru1 = nn.GRU(2*n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=0)
-        self.fc2 = nn.Linear(hidden_dim, n_output)
-        self.relu6 = nn.LeakyReLU()
-
-    def forward(self, x, h):
-        x = self.conv1(x)
-        x = self.relu1(self.bn1(x))
-        x = self.pool1(x)
-        
-        x = self.conv2(x)
-        x = self.relu2(self.bn2(x))
-        x = self.pool2(x)
-        
-        x = self.conv3(x)
-        x = self.relu3(self.bn3(x))
-        x = self.pool3(x)
-        
-        x = self.conv4(x)
-        x = self.relu4(self.bn4(x))
-        x = self.pool4(x)
-        
-        x = F.avg_pool1d(x, x.shape[-1])
-        x = x.permute(0, 2, 1)
-        x = self.fc1(self.relu5(x))
-        
-        x, h = self.gru1(x, h)
-        x = self.fc2(self.relu6(x[:,-1]))
-        
-        return F.log_softmax(x, dim=1), h
-
-    
-    def init_hidden(self, batch_size, device):
-        weight = next(self.parameters()).data
-        hidden = weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device)
-        return hidden
-
-
-# In[11]:
 
 
 def index_to_wordclass(index):
@@ -211,24 +23,9 @@ def wordclass_to_index(word):
     # Return the index of the word in wordclasses
     return torch.tensor(wordclasses.index(word))
 
-
-# In[12]:
-
-
-def pad_sequence(batch):
-    # Make all tensor in a batch the same length by padding with zeros
-    batch = [item.t() for item in batch]
-    
-    batch = torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=0.)
-    return batch.permute(0, 2, 1)
-
-
-# In[13]:
-
-
 def collate_fn(batch):
     # A data tuple has the format:
-    # waveform, sample_rate, wordclass, speaker_id, utterance_nr
+    # waveform, sample_rate, wordclass
 
     tensors, targets = [], []
 
@@ -243,81 +40,6 @@ def collate_fn(batch):
     targets = torch.stack(targets)
 
     return tensors, targets
-
-
-# In[14]:
-
-
-from torch import cuda
-import gc
-import inspect
-
-def get_less_used_gpu(gpus=None, debug=False):
-    """Inspect cached/reserved and allocated memory on specified gpus and return the id of the less used device"""
-    if gpus is None:
-        warn = 'Falling back to default: all gpus'
-        gpus = range(cuda.device_count())
-    elif isinstance(gpus, str):
-        gpus = [int(el) for el in gpus.split(',')]
-
-    # check gpus arg VS available gpus
-    sys_gpus = list(range(cuda.device_count()))
-    if len(gpus) > len(sys_gpus):
-        gpus = sys_gpus
-        warn = f'WARNING: Specified {len(gpus)} gpus, but only {cuda.device_count()} available. Falling back to default: all gpus.\nIDs:\t{list(gpus)}'
-    elif set(gpus).difference(sys_gpus):
-        # take correctly specified and add as much bad specifications as unused system gpus
-        available_gpus = set(gpus).intersection(sys_gpus)
-        unavailable_gpus = set(gpus).difference(sys_gpus)
-        unused_gpus = set(sys_gpus).difference(gpus)
-        gpus = list(available_gpus) + list(unused_gpus)[:len(unavailable_gpus)]
-        warn = f'GPU ids {unavailable_gpus} not available. Falling back to {len(gpus)} device(s).\nIDs:\t{list(gpus)}'
-
-    cur_allocated_mem = {}
-    cur_cached_mem = {}
-    max_allocated_mem = {}
-    max_cached_mem = {}
-    for i in gpus:
-        cur_allocated_mem[i] = cuda.memory_allocated(i)
-        cur_cached_mem[i] = cuda.memory_reserved(i)
-        max_allocated_mem[i] = cuda.max_memory_allocated(i)
-        max_cached_mem[i] = cuda.max_memory_reserved(i)
-    min_allocated = min(cur_allocated_mem, key=cur_allocated_mem.get)
-    if debug:
-        print(warn)
-        print('Current allocated memory:', {f'cuda:{k}': v for k, v in cur_allocated_mem.items()})
-        print('Current reserved memory:', {f'cuda:{k}': v for k, v in cur_cached_mem.items()})
-        print('Maximum allocated memory:', {f'cuda:{k}': v for k, v in max_allocated_mem.items()})
-        print('Maximum reserved memory:', {f'cuda:{k}': v for k, v in max_cached_mem.items()})
-        print('Suggested GPU:', min_allocated)
-    return min_allocated
-
-
-def free_memory(to_delete: list, debug=False):
-    calling_namespace = inspect.currentframe().f_back
-    if debug:
-        print('Before:')
-        get_less_used_gpu(debug=True)
-
-    for _var in to_delete:
-        calling_namespace.f_locals.pop(_var, None)
-        gc.collect()
-        cuda.empty_cache()
-    if debug:
-        print('After:')
-        get_less_used_gpu(debug=True)
-
-
-# In[15]:
-
-
-waveform_train, sample_rate = torchaudio.load(data['path'][0])
-new_sr = 16000
-transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sr)
-transformed = transform(waveform_train)
-
-
-# In[21]:
 
 
 def train_CNN5GRU(config, checkpoint_dir=None, data_path=None, max_num_epochs=None):
@@ -463,24 +185,6 @@ def train_CNN5GRU(config, checkpoint_dir=None, data_path=None, max_num_epochs=No
     print("Finished Training !")
 
 
-# In[22]:
-
-
-def nr_of_right(pred, target):
-    # count nr of right predictions
-    return pred.squeeze().eq(target).sum().item()
-
-
-# In[23]:
-
-
-def get_probable_idx(tensor):
-    # find most probable wordclass index for each element in the batch
-    return tensor.argmax(dim=-1)
-
-
-# In[24]:
-
 
 def test(model, batch_size, data_path):
     model.eval()
@@ -534,10 +238,6 @@ def test(model, batch_size, data_path):
     print(f"\nTest set accuracy: {right}/{len(test_loader.dataset)} ({100. * right / len(test_loader.dataset):.0f}%)\n")
 
     return (100. * right / len(test_loader.dataset)), y_pred, y_true
-
-
-# In[25]:
-
 
 def main(num_samples=10, max_num_epochs=10, gpus_per_trial=1):
     data_path = os.path.abspath('../Data_exploration/TESS_dataset.csv')
