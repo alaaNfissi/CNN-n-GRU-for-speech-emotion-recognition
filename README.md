@@ -162,11 +162,11 @@ Install all required dependencies in it:
 
 <p align="center">
   
-First, you need to download IEMOCAP and TESS datasets:
+1. First, you need to download IEMOCAP and TESS datasets:
   * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
   * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
   
-To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
+2. To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
 To do this, you must first start the notebook server by going into the
 repository top level and running:
 
@@ -181,6 +181,12 @@ Each cell can be executed using `Shift + Enter`.
 Executing text cells does nothing and executing code cells runs the code
 and produces it's output.
 To execute the whole notebook, run all cells in order.
+
+3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
+  
+python iemocap_cnn_3_gru.py
+  
+
 
 </p>
 
