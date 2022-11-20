@@ -141,21 +141,21 @@ Thus, you can install our dependencies without causing conflicts with your
 setup (even with different Python versions).
 
 Run the following command to create an `ser-env` environment to create a separate environment:
-
+```sh 
     conda create --name ser-env
-
+```
 Activate the environment, this will enable the it for your current terminal session. Any subsequent commands will use software that is installed in the environment:
-
+```sh 
     conda activate ser-env
-  
+ ``` 
 Use Pip to install packages to Anaconda Environment:
-
+```sh 
     conda install pip
-  
+```
 Install all required dependencies in it:
-
+```sh
     pip install -r requirements.txt
-
+```
 </p>
 
 ### Reproducing the results
