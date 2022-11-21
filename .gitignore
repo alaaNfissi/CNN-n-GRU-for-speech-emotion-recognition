@@ -2,8 +2,9 @@
 __pycache__/
 
 # Jupyter Notebook
-.ipynb_checkpoints
-
+Data_exploration/.ipynb_checkpoints
+CNN-n-GRU_TESS/.ipynb_checkpoints
+CNN-n-GRU_IEMOCAP/.ipynb_checkpoints
 # IPython
 profile_default/
 ipython_config.py
