@@ -105,7 +105,12 @@ In this paper, we introduce CNN-n-GRU, a novel end-to-end (E2E) architecture for
 <!-- GETTING STARTED -->
 ## Getting Started
 <p align="justify">
-  
+
+To begin our experiments, we first ensured that our signal has a sampling rate of 16 KHz and is mono-channel in order to standardise our experimental data format.
+Each dataset is segmented as follows: 80\% for training, 10\% for validation, and 10\% for testing based on stratified random sampling which entails categorising the whole population into homogenous groupings known as strata. Random samples are then drawn from each stratum unlike basic random sampling which considers all members of a population as equal. With an equal possibility of being sampled, it allows us to generate a sample population that best represents the total population being studied as it is used to emphasise distinctions across groups in a population. A Grid search is then used to find the appropriate hyperparameters. Some hyperparameter optimization approaches are known as "scheduling algorithms". These Trial Schedulers have the authority to terminate troublesome trials early, halt trials, clone trials, and alter trial hyperparameters while they are still running. Thus, the Asynchronous Successive Halving algorithm (ASHA) was picked because of its high performance.
+
+We examined four model architectures: CNN-3-GRU, CNN-5-GRU, CNN-11-GRU, and CNN-18-GRU. Each model is run for 100 epochs until it converges using Adam. As we are not using any pretrained model, the weights of each model are started from scratch. The receptive field of our first CNN layer is equal to _160_ which corresponds to _(sampling rate / 100)_ in our case to cover a 10-millisecond time span, to be comparable to the window size for many MFCC computations since we transformed all our data to 16 KHz representation. Our trials were run on a distributed multi-node system powered by four Nvidia Tesla T4 GPUs.
+
 All source code used to generate the results and figures in the paper are in
 the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders.
 The calculations and figure generation are all run inside
