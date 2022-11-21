@@ -6,7 +6,7 @@ from models import CNN3GRU
 
 
 
-data = load_data('/home/alaa/Downloads/Concordia/TÉLUQ/ser/Explo_1/Ph.D/CNN-n-GRU-for-speech-emotion-recognition/Data_exploration/IEMOCAP_dataset.csv')
+data = load_data('IEMOCAP_dataset.csv')
 
 
 waveform_train, sample_rate = torchaudio.load(data['path'][0])
