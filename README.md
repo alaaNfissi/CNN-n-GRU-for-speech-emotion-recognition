@@ -101,7 +101,7 @@ evaluated for speech emotion recognition, by comparison to state-
 of-the-art methods on both TESS and IEMOCAP datasets.
 The experimental results demonstrated the high accuracy of
 the proposed CNN-n-GRU model, outperforming state-of-the-art
-SER approaches.
+SER approaches. </p>
 <div align="center">
   
 ![model-architecture][model-architecture]
@@ -129,7 +129,6 @@ SER approaches.
 <!-- GETTING STARTED -->
 ## Getting Started
 <p align="justify">
-
 To begin our experiments, we first ensured that our signal has a sampling rate of 16 KHz and is mono-channel in order to standardise our experimental data format.
 Each dataset is segmented as follows: 80\% for training, 10\% for validation, and 10\% for testing based on stratified random sampling which entails categorising the whole population into homogenous groupings known as strata. Random samples are then drawn from each stratum unlike basic random sampling which considers all members of a population as equal. With an equal possibility of being sampled, it allows us to generate a sample population that best represents the total population being studied as it is used to emphasise distinctions across groups in a population. A Grid search is then used to find the appropriate hyperparameters. Some hyperparameter optimization approaches are known as "scheduling algorithms". These Trial Schedulers have the authority to terminate troublesome trials early, halt trials, clone trials, and alter trial hyperparameters while they are still running. Thus, the Asynchronous Successive Halving algorithm (ASHA) was picked because of its high performance.
 
@@ -140,8 +139,7 @@ the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders.
 The calculations and figure generation are all run inside
 [Jupyter notebooks](http://jupyter.org/).
 The data preprocessing used in this study is provided in `Data_exploration` folder.
-See the `README.md` files in each directory for a full description.
-  
+See the `README.md` files in each directory for a full description.  
 </p>
 
 ### Getting the code
@@ -156,7 +154,6 @@ or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-e
 ### Dependencies
 
 <p align="center">
-
 You'll need a working Python environment to run the code.
 The recommended way to set up your environment is through the
 [Anaconda Python distribution](https://www.anaconda.com/download/) which
@@ -186,13 +183,11 @@ Install all required dependencies in it:
 ```sh
     pip install -r requirements.txt
 ```
-
 </p>
 
 ### Reproducing the results
 
-<p align="center">
-  
+<p align="center">  
 1. First, you need to download IEMOCAP and TESS datasets:
   * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
   * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
@@ -220,8 +215,6 @@ python iemocap_cnn_3_gru.py
 ```
   
   _You can do the same thing for the TESS dataset by going to the `CNN-n-GRU_IEMOCAP` and runing one of the python files._
-
-
 </p>
 
 
