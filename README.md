@@ -75,33 +75,7 @@
 <!-- ABSTRACT -->
 ## Abstract
 
-<p align="justify"> Speech emotion recognition (SER) is challenging as
-human emotions are often ambiguous, which makes them difficult
-to identify. In this paper, we introduce CNN-n-GRU, a novel end-
-to-end (E2E) deep learning model for speech emotion recognition.
-The proposed architecture consists of an n-layer convolutional
-neural network (CNN) followed by an n-layer Gated Recurrent
-Unit (GRU). Both CNNs and RNNs demonstrated promising re-
-sults when processing raw waveform speech input. This motivated
-our idea of integrating them into a single architecture in order to
-take advantage of both approaches. Because a CNN model can
-generate multiple levels of abstraction for feature representation,
-we use it as a first component to extract high-level features, to
-be provided to subsequent RNN layers in order to aggregate
-long-term dependencies. On the one hand, we train our model
-in a way to allow the CNN component to recognise high-level
-speech representations from raw waveform, instead of extracting
-handcrafted features or spectrograms. This allows the network
-to better capture relevant narrow-band emotion features, while
-handling variable-length speech without requiring segmentation.
-On the other hand, the RNN component is able to learn temporal-
-based characteristics, allowing the network to better capture
-the signal’s time-distributed features. The proposed model was
-evaluated for speech emotion recognition, by comparison to state-
-of-the-art methods on both TESS and IEMOCAP datasets.
-The experimental results demonstrated the high accuracy of
-the proposed CNN-n-GRU model, outperforming state-of-the-art
-SER approaches. </p>
+<p align="justify"> Speech emotion recognition (SER) is challenging as human emotions are often ambiguous, which makes them difficult to identify. In this paper, we introduce CNN-n-GRU, a novel end-to-end (E2E) deep learning model for speech emotion recognition. The proposed architecture consists of an n-layer convolutional neural network (CNN) followed by an n-layer Gated Recurrent Unit (GRU). Both CNNs and RNNs demonstrated promising results when processing raw waveform speech input. This motivated our idea of integrating them into a single architecture in order to take advantage of both approaches. Because a CNN model can generate multiple levels of abstraction for feature representation, we use it as a first component to extract high-level features, to be provided to subsequent RNN layers in order to aggregate long-term dependencies. On the one hand, we train our model in a way to allow the CNN component to recognise high-level speech representations from raw waveform, instead of extracting handcrafted features or spectrograms. This allows the network to better capture relevant narrow-band emotion features, while handling variable-length speech without requiring segmentation. On the other hand, the RNN component is able to learn temporal-based characteristics, allowing the network to better capture the signal’s time-distributed features. The proposed model was evaluated for speech emotion recognition, by comparison to state-of-the-art methods on both TESS and IEMOCAP datasets. The experimental results demonstrated the high accuracy of the proposed CNN-n-GRU model, outperforming state-of-the-art SER approaches. </p>
 <div align="center">
   
 ![model-architecture][model-architecture]
@@ -131,13 +105,10 @@ SER approaches. </p>
 <p align="justify">
 To begin our experiments, we first ensured that our signal has a sampling rate of 16 KHz and is mono-channel in order to standardise our experimental data format.
 Each dataset is segmented as follows: 80\% for training, 10\% for validation, and 10\% for testing based on stratified random sampling which entails categorising the whole population into homogenous groupings known as strata. Random samples are then drawn from each stratum unlike basic random sampling which considers all members of a population as equal. With an equal possibility of being sampled, it allows us to generate a sample population that best represents the total population being studied as it is used to emphasise distinctions across groups in a population. A Grid search is then used to find the appropriate hyperparameters. Some hyperparameter optimization approaches are known as "scheduling algorithms". These Trial Schedulers have the authority to terminate troublesome trials early, halt trials, clone trials, and alter trial hyperparameters while they are still running. Thus, the Asynchronous Successive Halving algorithm (ASHA) was picked because of its high performance.
-We examined four model architectures: CNN-3-GRU, CNN-5-GRU, CNN-11-GRU, and CNN-18-GRU. Each model is run for 100 epochs until it converges using Adam. As we are not using any pretrained model, the weights of each model are started from scratch. The receptive field of our first CNN layer is equal to _160_ which corresponds to _(sampling rate / 100)_ in our case to cover a 10-millisecond time span, to be comparable to the window size for many MFCC computations since we transformed all our data to 16 KHz representation.
-All source code used to generate the results and figures in the paper are in
-the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders.
-The calculations and figure generation are all run inside
-[Jupyter notebooks](http://jupyter.org/).
-The data preprocessing used in this study is provided in `Data_exploration` folder.
-See the `README.md` files in each directory for a full description.  
+  
+We examined four model architectures: CNN-3-GRU, CNN-5-GRU, CNN-11-GRU, and CNN-18-GRU. Each model is run for 100 epochs until it converges using Adam. As we are not using any pretrained model, the weights of each model are started from scratch. The receptive field of our first CNN layer is equal to <em>160</em> which corresponds to <em>(sampling rate / 100)</em> in our case to cover a <em>10-millisecond</em> time span, to be comparable to the window size for many MFCC computations since we transformed all our data to <em>16 KHz</em> representation. All source code used to generate the results and figures in the paper are in
+the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders. The calculations and figure generation are all run inside [Jupyter notebooks](http://jupyter.org/).
+The data preprocessing used in this study is provided in `Data_exploration` folder. See the `README.md` files in each directory for a full description.  
 </p>
 
 ### Getting the code
@@ -152,6 +123,7 @@ or [download a zip archive](https://github.com/alaaNfissi/CNN-n-GRU-for-speech-e
 ### Dependencies
 
 <p align="center">
+
 You'll need a working Python environment to run the code.
 The recommended way to set up your environment is through the
 [Anaconda Python distribution](https://www.anaconda.com/download/) which
@@ -179,14 +151,17 @@ Install all required dependencies in it:
 ```sh
     pip install -r requirements.txt
 ```
+  
 </p>
 
 ### Reproducing the results
 
 <p align="center">  
+  
 1. First, you need to download IEMOCAP and TESS datasets:
   * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
-  * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)  
+  * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
+  
 2. To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
 To do this, you must first start the notebook server by going into the
 repository top level and running:
@@ -201,37 +176,46 @@ Each cell can be executed using `Shift + Enter`.
 Executing text cells does nothing and executing code cells runs the code
 and produces it's output.
 To execute the whole notebook, run all cells in order.
+ 
 3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was
   activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
 ```sh  
 python iemocap_cnn_3_gru.py
 ``` 
   _You can do the same thing for the TESS dataset by going to the `CNN-n-GRU_IEMOCAP` and runing one of the python files._
+
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Results
 <p align="center">  
-We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3, 5, 11, and 18. 
+  
+We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3, 5, 11, and 18.
+  
 </p>
 
 ### On IEMOCAP dataset
 <p align="center">  
+  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches 81.3% accuracy and 80.9% F1-score on the IEMOCAP dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU. 
+
 </p>
+
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
 :-----------------------------------------------------------------:|:-----------------------------:
 ![iemocap_cnn18gru_acc](images/iemocap_cnn18gru_acc.png)  |  ![iemocap_cnn18gru_confusion_matrix_1](images/iemocap_cnn18gru_confusion_matrix_1.png)
 
 
 ### On TESS dataset
-<p align="center">  
+<p align="center"> 
+  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches  99.2% accuracy and 99% F1-score on the TESS dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.  
+
 </p>
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
