@@ -75,9 +75,33 @@
 <!-- ABSTRACT -->
 ## Abstract
 
-<p align="justify"> Speech emotion recognition is challenging as human emotion is very ambiguous, making it challenging to distinguish. Often, it can only be detected intermittently across a long sentence, besides speech data with emotional categorization is typically rare.
-In this paper, we introduce CNN-n-GRU, a novel end-to-end (E2E) architecture for speech emotion recognition. The proposed architecture consists of an n-layer convolutional neural network (CNN) followed by an n-layer Gated Recurrent Unit (GRU). Both CNNs and RNNs demonstrated promesing results when processing raw waveform speech input. This motivated our idea of integrating them into a single architecture in order to take advantage of both models. On the one hand, we train our model in a way where CNN component is able to recognise low-level speech representations from raw waveform instead of hand-crafted features or spectrograms, allowing the network to better capture relevant narrow-band emotion features. In this manner, the CNN can handle variable-length speech without requiring segmentation, which prevents crucial data from being lost. On the other hand, RNN component is able to learn temporal-based characteristics, allowing the network to better capture the signal’s time-distributed features. Because CNN can generate multiple levels of abstraction for feature representation, we use it as a first model component to extract high-level features, to be provided to subsequent RNN layers in order to aggregate long-term dependencies. The proposed model was evaluated for speech emotion recognition, by comparison to state-of-the-art methods on both TESS and IEMOCAP datasets. The experimental results demonstrated the high accuracy of the proposed model CNN-n-GRU, outperforming traditional classification approaches. </p>
-
+<p align="justify"> Speech emotion recognition (SER) is challenging as
+human emotions are often ambiguous, which makes them difficult
+to identify. In this paper, we introduce CNN-n-GRU, a novel end-
+to-end (E2E) deep learning model for speech emotion recognition.
+The proposed architecture consists of an n-layer convolutional
+neural network (CNN) followed by an n-layer Gated Recurrent
+Unit (GRU). Both CNNs and RNNs demonstrated promising re-
+sults when processing raw waveform speech input. This motivated
+our idea of integrating them into a single architecture in order to
+take advantage of both approaches. Because a CNN model can
+generate multiple levels of abstraction for feature representation,
+we use it as a first component to extract high-level features, to
+be provided to subsequent RNN layers in order to aggregate
+long-term dependencies. On the one hand, we train our model
+in a way to allow the CNN component to recognise high-level
+speech representations from raw waveform, instead of extracting
+handcrafted features or spectrograms. This allows the network
+to better capture relevant narrow-band emotion features, while
+handling variable-length speech without requiring segmentation.
+On the other hand, the RNN component is able to learn temporal-
+based characteristics, allowing the network to better capture
+the signal’s time-distributed features. The proposed model was
+evaluated for speech emotion recognition, by comparison to state-
+of-the-art methods on both TESS and IEMOCAP datasets.
+The experimental results demonstrated the high accuracy of
+the proposed CNN-n-GRU model, outperforming state-of-the-art
+SER approaches.
 <div align="center">
   
 ![model-architecture][model-architecture]
