@@ -131,9 +131,7 @@ SER approaches. </p>
 <p align="justify">
 To begin our experiments, we first ensured that our signal has a sampling rate of 16 KHz and is mono-channel in order to standardise our experimental data format.
 Each dataset is segmented as follows: 80\% for training, 10\% for validation, and 10\% for testing based on stratified random sampling which entails categorising the whole population into homogenous groupings known as strata. Random samples are then drawn from each stratum unlike basic random sampling which considers all members of a population as equal. With an equal possibility of being sampled, it allows us to generate a sample population that best represents the total population being studied as it is used to emphasise distinctions across groups in a population. A Grid search is then used to find the appropriate hyperparameters. Some hyperparameter optimization approaches are known as "scheduling algorithms". These Trial Schedulers have the authority to terminate troublesome trials early, halt trials, clone trials, and alter trial hyperparameters while they are still running. Thus, the Asynchronous Successive Halving algorithm (ASHA) was picked because of its high performance.
-
 We examined four model architectures: CNN-3-GRU, CNN-5-GRU, CNN-11-GRU, and CNN-18-GRU. Each model is run for 100 epochs until it converges using Adam. As we are not using any pretrained model, the weights of each model are started from scratch. The receptive field of our first CNN layer is equal to _160_ which corresponds to _(sampling rate / 100)_ in our case to cover a 10-millisecond time span, to be comparable to the window size for many MFCC computations since we transformed all our data to 16 KHz representation.
-
 All source code used to generate the results and figures in the paper are in
 the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders.
 The calculations and figure generation are all run inside
@@ -161,12 +159,10 @@ provides the `conda` package manager.
 Anaconda can be installed in your user directory and does not interfere with
 the system Python installation.
 The required dependencies are specified in the file `requirements.txt`.
-
 We use `conda` virtual environments to manage the project dependencies in
 isolation.
 Thus, you can install our dependencies without causing conflicts with your
 setup (even with different Python versions).
-
 Run the following command to create an `ser-env` environment to create a separate environment:
 ```sh 
     conda create --name ser-env
@@ -190,8 +186,7 @@ Install all required dependencies in it:
 <p align="center">  
 1. First, you need to download IEMOCAP and TESS datasets:
   * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
-  * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
-  
+  * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)  
 2. To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
 To do this, you must first start the notebook server by going into the
 repository top level and running:
@@ -201,58 +196,42 @@ repository top level and running:
 This will start the server and open your default web browser to the Jupyter
 interface. In the page, go into the `Data_exploration` folder and select the
 `data_exploration.ipynb` notebook to view/run. Make sure to specify the correct datasets paths on your own machine as described in the notebook.
-
 The notebook is divided into cells (some have text while other have code).
 Each cell can be executed using `Shift + Enter`.
 Executing text cells does nothing and executing code cells runs the code
 and produces it's output.
 To execute the whole notebook, run all cells in order.
-
 3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was
   activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
 ```sh  
 python iemocap_cnn_3_gru.py
-```
-  
+``` 
   _You can do the same thing for the TESS dataset by going to the `CNN-n-GRU_IEMOCAP` and runing one of the python files._
 </p>
 
-
-
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
-
 ## Results
-<p align="center">
-  
-We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3, 5, 11, and 18.
-  
+<p align="center">  
+We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3, 5, 11, and 18. 
 </p>
 
 ### On IEMOCAP dataset
-<p align="center">
-  
+<p align="center">  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches 81.3% accuracy and 80.9% F1-score on the IEMOCAP dataset which is better compared to the state of-the-art methods.
-The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.
-  
+The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU. 
 </p>
-
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
 :-----------------------------------------------------------------:|:-----------------------------:
 ![iemocap_cnn18gru_acc](images/iemocap_cnn18gru_acc.png)  |  ![iemocap_cnn18gru_confusion_matrix_1](images/iemocap_cnn18gru_confusion_matrix_1.png)
 
 
 ### On TESS dataset
-<p align="center">
-  
+<p align="center">  
 Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches  99.2% accuracy and 99% F1-score on the TESS dataset which is better compared to the state of-the-art methods.
-The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.
-  
+The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.  
 </p>
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
