@@ -11,7 +11,7 @@
   <h3 align="center">From Unaltered Raw Waveform to Emotion: Synergizing Convolutional and Gated Recurrent Networks for Holistic Speech Emotion Analysis</h3>
 
   <p align="center">
-    This paper has been submitted for publication in IEEE Transactions on Emerging Topics in Computational Intelligence.
+    This paper has been submitted for publication in Elsevier Journal, Engineering Applications of Artificial Intelligence.
     <br />
    </p>
    <!-- <a href="https://github.com/alaaNfissi/CNN-n-GRU-for-speech-emotion-recognition"><strong>Explore the docs »</strong></a> -->
