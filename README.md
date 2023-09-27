@@ -8,7 +8,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Exploiting Convolutional Neural Networks and Gated Recurrent Units for Efficient End-to-End Speech Emotion Recognition from Raw Waveform Signal</h3>
+  <h3 align="center">From Unaltered Raw Waveform to Emotion: Synergizing Convolutional and Gated Recurrent Networks for Holistic Speech Emotion Analysis</h3>
 
   <p align="center">
     This paper has been submitted for publication in IEEE Transactions on Emerging Topics in Computational Intelligence.
