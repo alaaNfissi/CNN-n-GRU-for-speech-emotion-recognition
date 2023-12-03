@@ -68,7 +68,7 @@
   
 ![ser-approaches][ser-approaches]
   
-*SER appraoches*
+*Workflows in Speech Emotion Recognition*
   
 </div> 
 
