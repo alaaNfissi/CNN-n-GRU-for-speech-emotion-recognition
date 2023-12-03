@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# author: Alaa Nfissi
+
 from utils import *
 from models import CNN18GRU
 

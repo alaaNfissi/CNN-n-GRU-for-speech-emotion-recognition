@@ -1,3 +1,4 @@
+numpy
 absl_py==1.0.0+computecanada
 anyio==3.5.0+computecanada
 appdirs==1.4.4+computecanada

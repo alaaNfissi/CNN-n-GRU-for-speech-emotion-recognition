@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# author: Alaa Nfissi
+
 import os
 from functools import partial
 
