@@ -5,6 +5,7 @@
 
 import os
 from functools import partial
+import sys
 
 import torch
 import torch.nn as nn
@@ -31,24 +32,27 @@ import gc
 import inspect
 random.seed(1234)
 
-
-tess_folder = 'TESS DATA FOLDER LOCATION'
-tess_experiments_folder = 'EXPERIMENTS FOLDER LOCATION'
+# Handle imports for both package usage and direct script execution
+try:
+    # First try relative imports (when running as script directly)
+    import config
+except ImportError:
+    # Fall back to absolute imports (when running as a module)
+    import config
 
 
 class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, paths, labels):
-        self.files = paths
-        self.labels = labels
+    def __init__(self, X, Y):
+        self.X = X
+        self.Y = Y
         
-    def __getitem__(self, item):
-        file = self.files[item]
-        label = self.labels[item]
-        file, sampling_rate = torchaudio.load(file)
-        return file, sampling_rate, label
+    def __getitem__(self, idx):
+        waveform = self.X[idx]
+        emotion = self.Y[idx]
+        return waveform, emotion
     
     def __len__(self):
-        return len(self.files)
+        return len(self.Y)
 
 
 def get_dataset_partitions_pd(df, train_split=0.8, val_split=0.1, test_split=0.1, target_variable=None):
@@ -76,11 +80,12 @@ def get_dataset_partitions_pd(df, train_split=0.8, val_split=0.1, test_split=0.1
     
     return train_ds.reset_index(drop=True), val_ds.reset_index(drop=True), test_ds.reset_index(drop=True)
 
-def transform_data(data):
-    data_dir = os.path.abspath(tess_folder+'/TESS')
+
+def transform_data_tess(data):
+    data_dir = os.path.abspath(config.TESS_DATA_FOLDER)
     path_lst = []
     for i in data['path']:
-        path = data_dir+ '/' + '/'.join(i.split('/')[9:])
+        path = data_dir + '/' + '/'.join(i.split('/')[9:])
         waveform, sampling_rate = torchaudio.load(i)
         waveform = waveform if waveform.shape[0] == 1 else waveform[0].unsqueeze(0)
         sample_rate = 16000
@@ -91,7 +96,49 @@ def transform_data(data):
     return data
 
 
-def load_data(path):
+def transform_data_iemocap(data):
+    data_dir = os.path.abspath(config.IEMOCAP_DATA_FOLDER)
+    path_lst = []
+    for i in data['path']:
+        path = data_dir + '/' + '/'.join(i.split('/')[9:])
+        waveform, sampling_rate = torchaudio.load(i)
+        waveform = waveform if waveform.shape[0] == 1 else waveform[0].unsqueeze(0)
+        sample_rate = 16000
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        torchaudio.save(path, waveform, sample_rate)
+        path_lst.append(path)
+    data = pd.DataFrame({'label':data.label, 'path':path_lst})
+    return data
+
+
+def transform_data_ravdess(data):
+    data_dir = os.path.abspath(config.RAVDESS_DATA_FOLDER)
+    path_lst = []
+    for i in data['path']:
+        path = data_dir + '/' + '/'.join(i.split('/')[9:])
+        waveform, sampling_rate = torchaudio.load(i)
+        waveform = waveform if waveform.shape[0] == 1 else waveform[0].unsqueeze(0)
+        sample_rate = 16000
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        torchaudio.save(path, waveform, sample_rate)
+        path_lst.append(path)
+    data = pd.DataFrame({'label':data.label, 'path':path_lst})
+    return data
+
+
+def transform_data(data):
+    """Route to the appropriate transform function based on dataset"""
+    if config.DATASET.lower() == "tess":
+        return transform_data_tess(data)
+    elif config.DATASET.lower() == "iemocap":
+        return transform_data_iemocap(data)
+    elif config.DATASET.lower() == "ravdess":
+        return transform_data_ravdess(data)
+    else:
+        raise ValueError(f"Unknown dataset: {config.DATASET}")
+
+
+def load_data_tess(path):
     data = pd.read_csv(path)
     data = data[data['source'] == 'TESS'].reset_index()
     del data['source']
@@ -99,21 +146,51 @@ def load_data(path):
     data['label'] = [i.split('_')[1] for i in data['label']]
     return transform_data(data)
 
+
+def load_data_iemocap(path):
+    data = pd.read_csv(path)
+    data = data[data['source'] == 'IEMOCAP'].reset_index()
+    del data['source']
+    data.rename(columns={'labels':'label'}, inplace=True)
+    data['label'] = data['label'].replace('exc', 'hap')
+    data = data[data['label'].isin(['ang', 'hap', 'neu', 'sad'])].reset_index()
+    return transform_data(data)
+
+
+def load_data_ravdess(path):
+    data = pd.read_csv(path)
+    data = data[data['source'] == 'RAVDESS'].reset_index()
+    del data['source']
+    data.rename(columns={'labels':'label'}, inplace=True)
+    return transform_data(data)
+
+
+def load_data(path):
+    """Route to the appropriate load function based on dataset"""
+    if config.DATASET.lower() == "tess":
+        return load_data_tess(path)
+    elif config.DATASET.lower() == "iemocap":
+        return load_data_iemocap(path)
+    elif config.DATASET.lower() == "ravdess":
+        return load_data_ravdess(path)
+    else:
+        raise ValueError(f"Unknown dataset: {config.DATASET}")
+
+
 def init_data_sets(data):
-    train_ds, test_ds, val_ds  = get_dataset_partitions_pd(data,train_split=0.8, val_split=0.1, test_split=0.1, target_variable='label')
+    train_ds, test_ds, val_ds = get_dataset_partitions_pd(data, train_split=0.8, val_split=0.1, test_split=0.1, target_variable='label')
     train_set = MyDataset(train_ds['path'], train_ds['label'])
     validation_set = MyDataset(val_ds['path'], val_ds['label'])
     test_set = MyDataset(test_ds['path'], test_ds['label'])
     return train_set, validation_set, test_set
 
 
-
 def pad_sequence(batch):
-    # Make all tensor in a batch the same length by padding with zeros
-    batch = [item.t() for item in batch]
-    
-    batch = torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=0.)
-    return batch.permute(0, 2, 1)
+    # Make all tensor in a batch the same length
+    batch = [item.permute(1, 0) for item in batch]
+    batch = torch.nn.utils.rnn.pad_sequence(batch)
+    batch = batch.permute(1, 0, 2)
+    return batch
 
 
 def get_less_used_gpu(gpus=None, debug=False):
@@ -169,14 +246,4 @@ def free_memory(to_delete: list, debug=False):
         cuda.empty_cache()
     if debug:
         print('After:')
-        get_less_used_gpu(debug=True)
-
-
-def nr_of_right(pred, target):
-    # count nr of right predictions
-    return pred.squeeze().eq(target).sum().item()
-
-
-def get_probable_idx(tensor):
-    # find most probable wordclass index for each element in the batch
-    return tensor.argmax(dim=-1)
+        get_less_used_gpu(debug=True) 

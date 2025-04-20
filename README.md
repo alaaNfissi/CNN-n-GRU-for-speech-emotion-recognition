@@ -48,7 +48,7 @@
       <ul>
         <li><a href="#getting-the-code">Getting the code</a></li>
         <li><a href="#dependencies">Dependencies</a></li>
-        <li><a href="#reproducing-the-results">Reproducing the results</a></li>
+        <li><a href="#using-the-code">Using the code</a></li>
       </ul>
     </li>
     <li>
@@ -56,6 +56,7 @@
       <ul>
         <li><a href="#on-iemocap-dataset">On IEMOCAP dataset</a></li>
         <li><a href="#on-tess-dataset">On TESS dataset</a></li>
+        <li><a href="#on-ravdess-dataset">On RAVDESS dataset</a></li>
       </ul>
     </li>
     <li><a href="#contributing">Contributing</a></li>
@@ -75,7 +76,7 @@
 <!-- ABSTRACT -->
 ## Abstract
 
-<p align="justify"> Recognizing emotions from speech remains a challenging task due to the variability of vocal expression and the information loss associated with conventional feature extraction methods. This study introduces CNN-n-GRU, an end-to-end deep learning architecture developed to perform speech emotion recognition directly from raw waveform data. The model combines an n-layer convolutional neural network for extracting hierarchical local acoustic features with an n-layer gated recurrent unit designed to model long-term temporal dependencies in speech. The convolutional component acts as a feature extractor, generating progressively abstract representations of the input signal. These features are then passed to the gated recurrent layers, which capture sequential information and selectively retain emotionally relevant cues. By eliminating the need for handcrafted features or spectrogram transformations, the model preserves narrow-band emotional information and can efficiently handle speech signals of varying durations without explicit segmentation. The design draws conceptual motivation from auditory perception: the initial convolutional layers emulate Cochlear frequency selectivity, while the recurrent layers mirror the brain’s ability to focus on salient acoustic patterns over time. The proposed architecture is evaluated on three benchmark datasets. On TESS, the model achieves 99.2% accuracy and 99.0% F1-score, on the IEMOCAP dataset, it reaches 81.3% accuracy and 80.9% F1-score, and on the RAVDESS dataset, it attains an accuracy of 86.6% and an F1-score of 86.7%. These results represent improvements over state-of-the-art methods, with statistical significance and additional analysis supporting the consistency and robustness of the performance. Although effective in controlled data sets, the generalizability of the model to spontaneous emotional speech and speaker variability remains an open area for exploration. Future work will focus on expanding its applicability to more diverse, real-world acoustic environments. </p>
+<p align="justify"> Recognizing emotions from speech remains a challenging task due to the variability of vocal expression and the information loss associated with conventional feature extraction methods. This study introduces CNN-n-GRU, an end-to-end deep learning architecture developed to perform speech emotion recognition directly from raw waveform data. The model combines an n-layer convolutional neural network for extracting hierarchical local acoustic features with an n-layer gated recurrent unit designed to model long-term temporal dependencies in speech. The convolutional component acts as a feature extractor, generating progressively abstract representations of the input signal. These features are then passed to the gated recurrent layers, which capture sequential information and selectively retain emotionally relevant cues. By eliminating the need for handcrafted features or spectrogram transformations, the model preserves narrow-band emotional information and can efficiently handle speech signals of varying durations without explicit segmentation. The design draws conceptual motivation from auditory perception: the initial convolutional layers emulate Cochlear frequency selectivity, while the recurrent layers mirror the brain's ability to focus on salient acoustic patterns over time. The proposed architecture is evaluated on three benchmark datasets. On TESS, the model achieves 99.2% accuracy and 99.0% F1-score, on the IEMOCAP dataset, it reaches 81.3% accuracy and 80.9% F1-score, and on the RAVDESS dataset, it attains an accuracy of 86.6% and an F1-score of 86.7%. These results represent improvements over state-of-the-art methods, with statistical significance and additional analysis supporting the consistency and robustness of the performance. Although effective in controlled data sets, the generalizability of the model to spontaneous emotional speech and speaker variability remains an open area for exploration. Future work will focus on expanding its applicability to more diverse, real-world acoustic environments. </p>
 <div align="center">
   
 ![model-architecture][model-architecture]
@@ -107,8 +108,7 @@ To begin our experiments, we first ensured that our signal has a sampling rate o
 Each dataset is segmented as follows: 80\% for training, 10\% for validation, and 10\% for testing based on stratified random sampling which entails categorising the whole population into homogenous groupings known as strata. Random samples are then drawn from each stratum unlike basic random sampling which considers all members of a population as equal. With an equal possibility of being sampled, it allows us to generate a sample population that best represents the total population being studied as it is used to emphasise distinctions across groups in a population. A Grid search is then used to find the appropriate hyperparameters. Some hyperparameter optimization approaches are known as "scheduling algorithms". These Trial Schedulers have the authority to terminate troublesome trials early, halt trials, clone trials, and alter trial hyperparameters while they are still running. Thus, the Asynchronous Successive Halving algorithm (ASHA) was picked because of its high performance.
   
 We examined four model architectures: CNN-3-GRU, CNN-5-GRU, CNN-11-GRU, and CNN-18-GRU. Each model is run for 100 epochs until it converges using Adam. As we are not using any pretrained model, the weights of each model are started from scratch. The receptive field of our first CNN layer is equal to <em>160</em> which corresponds to <em>(sampling rate / 100)</em> in our case to cover a <em>10-millisecond</em> time span, to be comparable to the window size for many MFCC computations since we transformed all our data to <em>16 KHz</em> representation. All source code used to generate the results and figures in the paper are in
-the `CNN-n-GRU_IEMOCAP` and `CNN-n-GRU_TESS` folders. The calculations and figure generation are all run inside [Jupyter notebooks](http://jupyter.org/).
-The data preprocessing used in this study is provided in `Data_exploration` folder. See the `README.md` files in each directory for a full description.  
+the project repository. This unified implementation supports TESS, IEMOCAP, and RAVDESS datasets through a central configuration file. See the details below for a full description.  
 </p>
 
 ### Getting the code
@@ -136,54 +136,87 @@ isolation.
 Thus, you can install our dependencies without causing conflicts with your
 setup (even with different Python versions).
 Run the following command to create an `ser-env` environment to create a separate environment:
-```sh 
+
     conda create --name ser-env
-```
+
 Activate the environment, this will enable the it for your current terminal session. Any subsequent commands will use software that is installed in the environment:
-```sh 
+
     conda activate ser-env
- ``` 
+
 Use Pip to install packages to Anaconda Environment:
-```sh 
+
     conda install pip
-```
+
 Install all required dependencies in it:
-```sh
+
     pip install -r requirements.txt
-```
+
   
 </p>
 
-### Reproducing the results
+### Using the code
 
 <p align="center">  
   
-1. First, you need to download IEMOCAP and TESS datasets:
-  * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
+1. First, you need to download the datasets:
   * [TESS official website](https://tspace.library.utoronto.ca/handle/1807/24487)
+  * [IEMOCAP official website](https://sail.usc.edu/iemocap/)
+  * [RAVDESS official website](https://zenodo.org/record/1188976)
   
-2. To be able to explore the data you need to execute the Jupyter notebook that prepares the `csv` files needed for the experiments.
-To do this, you must first start the notebook server by going into the
-repository top level and running:
-```sh 
-    jupyter notebook
-```
-This will start the server and open your default web browser to the Jupyter
-interface. In the page, go into the `Data_exploration` folder and select the
-`data_exploration.ipynb` notebook to view/run. Make sure to specify the correct datasets paths on your own machine as described in the notebook.
-The notebook is divided into cells (some have text while other have code).
-Each cell can be executed using `Shift + Enter`.
-Executing text cells does nothing and executing code cells runs the code
-and produces it's output.
-To execute the whole notebook, run all cells in order.
- 
-3. After generating the needed `csv` files `IEMOCAP_dataset.csv` and `TESS_dataset.csv`, go to your terminal where the `ser-env` environment was
-  activated and go to `CNN-n-GRU_IEMOCAP` folder and choose one of the python files to run the experiment that you want. For example:
-```sh  
-python iemocap_cnn_3_gru.py
-``` 
-  _You can do the same thing for the TESS dataset by going to the `CNN-n-GRU_IEMOCAP` and runing one of the python files._
+2. Update the dataset paths in the configuration file:
 
+Open `config.py` and set the paths to your downloaded datasets:
+
+```python
+# Dataset selection - change this to switch between datasets
+# Options: "tess", "iemocap", or "ravdess"
+DATASET = "tess"
+
+# Directory paths - update these to your local paths
+# Recommended structure is to place datasets in a 'datasets' folder
+TESS_DATA_FOLDER = "../datasets/TESS"
+IEMOCAP_DATA_FOLDER = "../datasets/IEMOCAP"
+RAVDESS_DATA_FOLDER = "../datasets/RAVDESS"
+```
+
+3. Make sure your ser-env environment is activated:
+
+```bash
+conda activate ser-env
+```
+
+4. Run the code with default settings:
+
+```bash
+# Navigate to the project directory
+cd CNN-n-GRU-for-speech-emotion-recognition
+
+# Run the main script
+python -m main.py
+```
+
+5. For custom options:
+
+```bash
+# Train a specific model using GPU
+python -m main.py --model cnn18gru --train --test --cuda
+
+# Evaluate a pre-trained model
+python -m main.py --model cnn18gru --test --load_checkpoint path/to/checkpoint.pt
+
+# See all available options
+python -m main.py --help
+```
+
+6. Use different datasets:
+
+```bash
+# Use the IEMOCAP dataset
+python -m main.py --dataset iemocap --train --test
+
+# Use the RAVDESS dataset
+python -m main.py --dataset ravdess --train --test
+```
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -198,7 +231,7 @@ We implemented the proposed architecture CNN-n-GRU in four versions, with n = 3,
 ### On IEMOCAP dataset
 <p align="center">  
   
-Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
+Amoung our model's four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches 81.3% accuracy and 80.9% F1-score on the IEMOCAP dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU. 
 
@@ -212,7 +245,7 @@ CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU
 ### On TESS dataset
 <p align="center"> 
   
-Amoung our model’s four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
+Amoung our model's four versions performance, the best architecture of our model is CNN-18-GRU as it achieves the highest accuracy and F1-score, 
 where it reaches  99.2% accuracy and 99% F1-score on the TESS dataset which is better compared to the state of-the-art methods.
 The CNN-18-GRU training and validation accuracy over epochs figure shows the evolution of training and validation accuracy of the CNN-18-GRU over 100 epochs. The confusion matrix in CNN-18-GRU confusion matrix figure describes class-wise test results of the CNN18-GRU.  
 
@@ -220,7 +253,22 @@ The CNN-18-GRU training and validation accuracy over epochs figure shows the evo
 
 CNN-18-GRU training and validation accuracy over epochs            |  CNN-18-GRU confusion matrix
 :-----------------------------------------------------------------:|:-----------------------------:
-![cnn18gru_acc](images/cnn18gru_acc.png)  |  ![cnn18gru_confusion_matrix_1](images/cnn18gru_confusion_matrix.png)
+![cnn18gru_acc](images/cnn18gru_acc.png)  |  ![cnn18gru_confusion_matrix](images/cnn18gru_confusion_matrix.png)
+
+### On RAVDESS dataset
+<p align="center"> 
+  
+Our CNN-18-GRU model also demonstrates excellent performance on the RAVDESS dataset, achieving an accuracy of 86.6% and an F1-score of 86.7%. The confusion matrix below shows the model's performance across the 8 emotion categories in RAVDESS, revealing strong discrimination capabilities particularly for angry, fearful, and surprised emotional states.
+
+</p>
+
+<div align="center">
+  
+![ravdess_cfm](images/ravdess_cfm.png)
+  
+*CNN-18-GRU confusion matrix on RAVDESS dataset*
+  
+</div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -254,7 +302,7 @@ Don't forget to give the project a star! Thanks again!
 
 All source code is made available under a BSD 3-clause license. You can freely
 use and modify the code, without warranty, so long as you provide attribution
-to the authors. See `LICENSE.md` for the full license text.
+to the authors. See [`LICENSE.md`](LICENSE.md) for the full license text.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

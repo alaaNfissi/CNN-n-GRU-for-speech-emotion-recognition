@@ -1,4 +1,4 @@
-Copyright (c) YEAR AUTHORS.
+Copyright (c) 2025 Alaa Nfissi.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
