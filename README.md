@@ -192,30 +192,30 @@ conda activate ser-env
 cd CNN-n-GRU-for-speech-emotion-recognition
 
 # Run the main script
-python -m main.py
+python main.py
 ```
 
 5. For custom options:
 
 ```bash
 # Train a specific model using GPU
-python -m main.py --model cnn18gru --train --test --cuda
+python main.py --model cnn18gru --train --test --cuda
 
 # Evaluate a pre-trained model
-python -m main.py --model cnn18gru --test --load_checkpoint path/to/checkpoint.pt
+python main.py --model cnn18gru --test --load_checkpoint path/to/checkpoint.pt
 
 # See all available options
-python -m main.py --help
+python main.py --help
 ```
 
 6. Use different datasets:
 
 ```bash
 # Use the IEMOCAP dataset
-python -m main.py --dataset iemocap --train --test
+python main.py --dataset iemocap --train --test
 
 # Use the RAVDESS dataset
-python -m main.py --dataset ravdess --train --test
+python main.py --dataset ravdess --train --test
 ```
 </p>
 
