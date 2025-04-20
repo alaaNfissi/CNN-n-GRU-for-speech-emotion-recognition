@@ -3,15 +3,35 @@
 
 # author: Alaa Nfissi
 
-import os
-import torch
-import torchaudio
-import random
-import numpy as np
-from torch.utils.data import DataLoader, Dataset, random_split
-from torch.nn.utils.rnn import pad_sequence
-from sklearn.model_selection import train_test_split
-import pandas as pd
+"""
+Dataset handling for Speech Emotion Recognition models.
+
+This module provides functions for loading and processing speech emotion datasets.
+It requires CSV files with the following structure:
+- 'path': column containing the full path to the audio file
+- 'label': column containing the emotion label (e.g., 'angry', 'happy', etc.)
+- 'source': column indicating the dataset source ('TESS', 'IEMOCAP', or 'RAVDESS')
+
+Users need to create these CSV files for their datasets with the above structure.
+Example CSV format:
+path,label,source
+/path/to/audio1.wav,happy,TESS
+/path/to/audio2.wav,angry,TESS
+...
+
+For TESS dataset: labels should be one of ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+For IEMOCAP dataset: labels should be one of ['ang', 'hap', 'neu', 'sad']
+For RAVDESS dataset: labels should be one of ['neutral', 'calm', 'happy', 'sad', 'angry', 'fearful', 'disgust', 'surprised']
+"""
+
+# Import common modules from centralized location
+from utils.common_imports import (
+    os, torch, torchaudio, random, np, 
+    DataLoader, Dataset, pad_sequence,
+    train_test_split, pd
+)
+# Import modules not in common_imports directly
+from torch.utils.data import random_split
 import re
 
 # Set random seed for reproducibility
@@ -23,11 +43,11 @@ np.random.seed(42)
 try:
     # First try relative imports (when running as script directly)
     import config
-    from utils.training import MyDataset, pad_sequence, transform_data, load_data, init_data_sets
+    from utils.training import MyDataset, transform_data, load_data, init_data_sets
 except ImportError:
     # Fall back to absolute imports (when running as a module)
-    import config
-    from utils.training import MyDataset, pad_sequence, transform_data, load_data, init_data_sets
+    import CNN_n_GRU.config as config
+    from CNN_n_GRU.utils.training import MyDataset, transform_data, load_data, init_data_sets
 
 
 def wordclass_to_index(word, dataset=None):
@@ -81,22 +101,38 @@ def collate_fn(batch):
     """
     Collate function for batching in DataLoader
     
-    A data tuple has the format:
-    waveform, sample_rate, wordclass
+    A data tuple now has the format:
+    waveform, wordclass
     """
     tensors, targets = [], []
     
     # Gather in lists, and encode wordclasses as indices
-    for waveform, _, wordclass, *_ in batch:
-        tensors += [waveform]
-        targets += [wordclass_to_index(wordclass)]
+    for path, wordclass in batch:
+        # Load the audio file
+        try:
+            waveform, sample_rate = torchaudio.load(path)
+            # Make sure waveform is the right shape
+            waveform = waveform if waveform.shape[0] == 1 else waveform[0].unsqueeze(0)
+            tensors.append(waveform)
+            targets.append(wordclass_to_index(wordclass))
+        except Exception as e:
+            print(f"Error loading audio file {path}: {e}")
+            continue
     
-    # Group the list of tensors into a batched tensor
-    tensors = pad_sequence(tensors)
-    # stack - Concatenates a sequence of tensors along a new dimension
+    if not tensors:
+        raise ValueError("No valid audio files were loaded in this batch")
+    
+    # Use pad_sequence instead of stack to handle tensors of different lengths
+    # First convert list of 2D tensors to a list of 1D tensors by permuting dimensions
+    tensors_permuted = [tensor.permute(1, 0) for tensor in tensors]
+    # Pad the sequence to make all tensors the same length
+    padded = torch.nn.utils.rnn.pad_sequence(tensors_permuted)
+    # Permute back to get the right dimensions [batch, channel, sequence]
+    tensors_padded = padded.permute(1, 2, 0)
+    
     targets = torch.stack(targets)
     
-    return tensors, targets
+    return tensors_padded, targets
 
 
 def get_data_path():

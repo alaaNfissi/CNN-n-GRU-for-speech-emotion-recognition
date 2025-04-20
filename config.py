@@ -5,6 +5,8 @@
 Configuration settings for Speech Emotion Recognition models
 """
 
+import os
+
 # Dataset selection - change this to switch between datasets
 # Options: "tess", "iemocap", or "ravdess"
 DATASET = "tess"
@@ -20,9 +22,11 @@ DATASET = "tess"
 #   - models/
 #   - utils/
 #   - ...
-TESS_DATA_FOLDER = "../datasets/TESS"
-IEMOCAP_DATA_FOLDER = "../datasets/IEMOCAP"
-RAVDESS_DATA_FOLDER = "../datasets/RAVDESS"
+
+# Use environment variables if available, otherwise use default relative paths
+TESS_DATA_FOLDER = os.environ.get("TESS_DATA_PATH", "../datasets/TESS")
+IEMOCAP_DATA_FOLDER = os.environ.get("IEMOCAP_DATA_PATH", "../datasets/IEMOCAP")
+RAVDESS_DATA_FOLDER = os.environ.get("RAVDESS_DATA_PATH", "../datasets/RAVDESS")
 
 # Model hyperparameters
 BATCH_SIZE = 32

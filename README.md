@@ -199,24 +199,63 @@ python main.py
 
 ```bash
 # Train a specific model using GPU
-python main.py --model cnn18gru --train --test --cuda
+python -m main --model cnn18gru --train --test
 
 # Evaluate a pre-trained model
-python main.py --model cnn18gru --test --load_checkpoint path/to/checkpoint.pt
+python -m main --model cnn18gru --test --load_checkpoint path/to/checkpoint.pt
+
+# Use dropout regularization for better generalization
+python -m main --model cnn18gru --train --test --dropout 0.2
+
+# Perform hyperparameter grid search to find optimal configuration
+python -m main --model cnn3gru --grid_search
 
 # See all available options
-python main.py --help
+python -m main --help
 ```
 
 6. Use different datasets:
 
 ```bash
 # Use the IEMOCAP dataset
-python main.py --dataset iemocap --train --test
+python -m main --dataset iemocap --train --test
 
 # Use the RAVDESS dataset
-python main.py --dataset ravdess --train --test
+python -m main --dataset ravdess --train --test
 ```
+
+7. Advanced training options:
+
+```bash
+# Train with custom hyperparameters
+python -m main --model cnn18gru --train --test --lr 0.001 --hidden_dim 128 --num_layers 2 --dropout 0.3 --batch_size 64
+
+# Train for a specific number of epochs
+python -m main --model cnn18gru --train --test --epochs 50
+```
+
+8. Hyperparameter Grid Search:
+
+The project includes a comprehensive grid search functionality to automatically find the best hyperparameters for your model and dataset. This leverages Ray Tune to efficiently search across a large hyperparameter space.
+
+```bash
+# Run grid search for CNN3GRU model
+python -m main --model cnn3gru --grid_search
+
+# Run grid search for CNN18GRU model
+python -m main --model cnn18gru --grid_search
+```
+
+The grid search explores relevant hyperparameters including learning rates, weight decay, batch sizes, model architecture dimensions, dropout rates, optimizers, and schedulers. This helps identify the optimal configuration for your specific dataset and use case, significantly improving model performance without manual tuning.
+
+The best model configuration will be saved to the experiments directory and can be loaded for later use.
+
+```bash
+# Load and test the best model found by grid search
+python -m main --model cnn3gru --test --load_checkpoint experiments/tess/cnn3gru/best_model.pth
+```
+
+For larger datasets or more complex models, you may want to reduce the search space by modifying the `grid_search` function in `main.py`.
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

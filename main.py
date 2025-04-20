@@ -4,16 +4,22 @@
 # author: Alaa Nfissi
 
 import os
-import argparse
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sn
-from tqdm import tqdm
 import sys
+import argparse
+
+# Add the parent directory to sys.path to make package imports work
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+# Import common modules from centralized location
+from utils.common_imports import (
+    torch, nn, F, optim, np, plt, sn, tqdm, sys,
+    tune, CLIReporter, ASHAScheduler, RAY_AVAILABLE
+)
+
+# Add DataLoader import
+from torch.utils.data import DataLoader
 
 # Handle imports for both package usage and direct script execution
 try:
@@ -25,11 +31,16 @@ try:
     from utils.training import free_memory
 except ImportError:
     # Fall back to absolute imports (when running as a module)
-    import config
-    from models import CNN3GRU, CNN5GRU, CNN11GRU, CNN18GRU
-    from datasets import get_dataloader, get_num_classes, get_emotion_classes
-    from utils.metrics import nr_of_right, get_probable_idx, plot_confusion_matrix
-    from utils.training import free_memory
+    import CNN_n_GRU.config as config
+    from CNN_n_GRU.models import CNN3GRU, CNN5GRU, CNN11GRU, CNN18GRU
+    from CNN_n_GRU.datasets import get_dataloader, get_num_classes, get_emotion_classes
+    from CNN_n_GRU.utils.metrics import nr_of_right, get_probable_idx, plot_confusion_matrix
+    from CNN_n_GRU.utils.training import free_memory
+
+# Check if Ray is available, which is required for grid search
+if not RAY_AVAILABLE:
+    print("WARNING: Ray is not installed. Grid search functionality will not be available.")
+    print("To install, run: pip install ray[tune]")
 
 
 def get_model(model_name):
@@ -276,6 +287,300 @@ def test(model, test_loader, device):
     return test_acc, cm
 
 
+def train_tune(config, model_class, checkpoint_dir=None, data_loaders=None):
+    """
+    Training function for ray.tune
+    
+    Parameters:
+        config: Configuration dictionary provided by ray.tune
+        model_class: PyTorch model class
+        checkpoint_dir: Directory for checkpoints
+        data_loaders: Tuple of (train_loader, val_loader)
+    
+    Returns:
+        None
+    """
+    train_loader, val_loader = data_loaders
+    
+    # Always use GPU if available
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    # Custom batch size requires recreating dataloaders
+    if config["batch_size"] != train_loader.batch_size:
+        # Get dataset from loader
+        train_dataset = train_loader.dataset
+        val_dataset = val_loader.dataset
+        
+        # Recreate dataloaders with new batch size
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=config["batch_size"],
+            shuffle=True,
+            drop_last=True,
+            collate_fn=train_loader.collate_fn,
+            num_workers=8,
+            pin_memory=torch.cuda.is_available(),
+        )
+        
+        val_loader = DataLoader(
+            val_dataset,
+            batch_size=config["batch_size"],
+            shuffle=False,
+            drop_last=True,
+            collate_fn=val_loader.collate_fn,
+            num_workers=8,
+            pin_memory=torch.cuda.is_available(),
+        )
+    
+    # Instantiate model
+    model = model_class(
+        n_input=1,
+        hidden_dim=config["hidden_dim"],
+        n_layers=config["num_layers"],
+        n_output=get_num_classes(),
+        dropout=config.get("dropout", 0.0)  # Add dropout parameter
+    )
+    model.to(device)
+    
+    # Set up optimizer based on config
+    if config["optimizer"].lower() == "adam":
+        optimizer = optim.Adam(
+            model.parameters(), 
+            lr=config["lr"],
+            weight_decay=config["weight_decay"]
+        )
+    elif config["optimizer"].lower() == "adamw":
+        optimizer = optim.AdamW(
+            model.parameters(), 
+            lr=config["lr"],
+            weight_decay=config["weight_decay"]
+        )
+    elif config["optimizer"].lower() == "sgd":
+        optimizer = optim.SGD(
+            model.parameters(), 
+            lr=config["lr"],
+            weight_decay=config["weight_decay"],
+            momentum=0.9
+        )
+    else:
+        # Default to Adam
+        optimizer = optim.Adam(
+            model.parameters(), 
+            lr=config["lr"],
+            weight_decay=config["weight_decay"]
+        )
+    
+    # Set up learning rate scheduler
+    if config["scheduler"].lower() == "step":
+        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+    elif config["scheduler"].lower() == "cosine":
+        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=config["epochs"])
+    else:
+        # No scheduler
+        lr_scheduler = None
+    
+    # Load checkpoint if provided
+    if checkpoint_dir:
+        checkpoint = os.path.join(checkpoint_dir, "checkpoint")
+        model_state, optimizer_state = torch.load(checkpoint)
+        model.load_state_dict(model_state)
+        optimizer.load_state_dict(optimizer_state)
+    
+    # Training loop
+    for epoch in range(config["epochs"]):
+        model.train()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+        
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data = data.to(device)
+            target = target.to(device)
+            
+            h = model.init_hidden(data.size(0), device)
+            h = h.data
+            
+            optimizer.zero_grad()
+            
+            output, h = model(data, h)
+            loss = F.nll_loss(output, target)
+            
+            loss.backward()
+            optimizer.step()
+            
+            pred = get_probable_idx(output)
+            correct += nr_of_right(pred, target)
+            total += target.size(0)
+            
+            running_loss += loss.item()
+            
+            free_memory([data, target, output, h])
+        
+        # Compute average training metrics
+        train_loss = running_loss / len(train_loader)
+        train_acc = 100. * correct / total
+        
+        # Validation
+        model.eval()
+        val_loss = 0.0
+        correct = 0
+        total = 0
+        
+        with torch.no_grad():
+            for data, target in val_loader:
+                data = data.to(device)
+                target = target.to(device)
+                
+                h = model.init_hidden(data.size(0), device)
+                h = h.data
+                
+                output, h = model(data, h)
+                loss = F.nll_loss(output, target)
+                
+                val_loss += loss.item()
+                
+                pred = get_probable_idx(output)
+                correct += nr_of_right(pred, target)
+                total += target.size(0)
+                
+                free_memory([data, target, output, h])
+        
+        # Compute average validation metrics
+        val_loss = val_loss / len(val_loader)
+        val_acc = 100. * correct / total
+        
+        # Report metrics to ray.tune
+        tune.report(
+            train_loss=train_loss, 
+            train_accuracy=train_acc, 
+            val_loss=val_loss, 
+            val_accuracy=val_acc
+        )
+        
+        # Step the learning rate scheduler if it exists
+        if lr_scheduler is not None:
+            lr_scheduler.step()
+        
+        # Save checkpoint
+        with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            path = os.path.join(checkpoint_dir, "checkpoint")
+            torch.save(
+                (model.state_dict(), optimizer.state_dict()), path
+            )
+
+
+def grid_search(model_class, train_loader, val_loader, save_dir="experiments"):
+    """
+    Perform grid search to find the best hyperparameters
+    
+    Parameters:
+        model_class: PyTorch model class
+        train_loader: DataLoader for training data
+        val_loader: DataLoader for validation data
+        save_dir: Directory to save results
+        
+    Returns:
+        best_config: Dictionary containing the best hyperparameters
+    """
+    if not RAY_AVAILABLE:
+        print("ERROR: Ray is not installed. Cannot perform grid search.")
+        print("To install, run: pip install ray[tune]")
+        return None
+    
+    import ray
+    from ray import tune
+    from ray.tune import CLIReporter
+    from ray.tune.schedulers import ASHAScheduler
+    
+    print("Starting grid search...")
+    
+    # Initialize Ray if not already initialized
+    if ray.is_initialized():
+        ray.shutdown()
+    ray.init(ignore_reinit_error=True)
+    
+    # Create the experiments directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Define hyperparameter search space (exhaustive grid search)
+    epochs_for_trials = 30  # Reduced epochs for each trial
+    
+    # Define the full grid for hyperparameter search
+    config = {
+        "model_name": model_class.__name__,
+        "lr": tune.grid_search([0.00001, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05]),
+        "weight_decay": tune.grid_search([0, 1e-6, 1e-5, 5e-5, 1e-4, 5e-4, 1e-3]),
+        "batch_size": tune.grid_search([16, 32, 64, 128]),
+        "hidden_dim": tune.grid_search([32, 64, 128, 256, 512]),
+        "num_layers": tune.grid_search([1, 2, 3, 4]),
+        "dropout": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.5]),
+        "optimizer": tune.grid_search(["adam", "adamw", "sgd"]),
+        "scheduler": tune.grid_search(["step", "cosine", "none"]),
+        "epochs": epochs_for_trials,
+    }
+    
+    # Define scheduler - ASHA scheduler for early stopping of bad trials
+    scheduler = ASHAScheduler(
+        max_t=epochs_for_trials,
+        grace_period=10,
+        reduction_factor=2
+    )
+    
+    # Define reporter for printing results
+    reporter = CLIReporter(
+        parameter_columns=["model_name", "lr", "weight_decay", "hidden_dim", "num_layers", "batch_size", "dropout", "optimizer", "scheduler"],
+        metric_columns=["train_loss", "train_accuracy", "val_loss", "val_accuracy"],
+        max_report_frequency=30
+    )
+    
+    # Define the search algorithm
+    search_alg = None  # For exhaustive grid search, no special algorithm needed
+    
+    # Determine available GPU resources
+    num_gpus = torch.cuda.device_count()
+    gpu_per_trial = 1 if num_gpus > 0 else 0
+    
+    print(f"Found {num_gpus} GPUs available for grid search")
+    if num_gpus == 0:
+        print("WARNING: No GPUs found! Training will be slow. Consider running on a machine with GPUs.")
+    
+    # Run the tuning
+    result = tune.run(
+        tune.with_parameters(
+            train_tune,
+            model_class=model_class,
+            data_loaders=(train_loader, val_loader)
+        ),
+        resources_per_trial={"cpu": 2, "gpu": gpu_per_trial},
+        config=config,
+        metric="val_accuracy",
+        mode="max",
+        scheduler=scheduler,
+        progress_reporter=reporter,
+        local_dir=save_dir,
+        name=f"grid_search_{model_class.__name__}",
+        num_samples=1,  # Only needed for random search
+        verbose=1,
+        search_alg=search_alg
+    )
+    
+    # Get best trial
+    best_trial = result.get_best_trial("val_accuracy", "max", "last")
+    best_config = best_trial.config
+    best_checkpoint_dir = best_trial.checkpoint.value
+    
+    print(f"Best trial config: {best_config}")
+    print(f"Best trial final validation accuracy: {best_trial.last_result['val_accuracy']}")
+    
+    # Load the best model
+    best_checkpoint_path = os.path.join(best_checkpoint_dir, "checkpoint")
+    
+    # Print the location of the best checkpoint
+    print(f"Best checkpoint saved at: {best_checkpoint_path}")
+    
+    return best_config
+
+
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='CNN-n-GRU for Speech Emotion Recognition')
@@ -295,14 +600,18 @@ def main():
                       help=f'Hidden dimension for GRU (default: {config.HIDDEN_DIM})')
     parser.add_argument('--num_layers', type=int, default=config.GRU_LAYERS,
                       help=f'Number of GRU layers (default: {config.GRU_LAYERS})')
+    parser.add_argument('--dropout', type=float, default=0.0,
+                      help='Dropout rate (default: 0.0)')
     parser.add_argument('--train', action='store_true',
                       help='Train the model')
     parser.add_argument('--test', action='store_true',
                       help='Test the model')
     parser.add_argument('--cuda', action='store_true',
-                      help='Use CUDA if available')
+                      help='Use CUDA if available (deprecated, GPU is used by default if available)')
     parser.add_argument('--seed', type=int, default=42,
                       help='Random seed (default: 42)')
+    parser.add_argument('--grid_search', action='store_true',
+                      help='Perform grid search to find the best hyperparameters')
     
     args = parser.parse_args()
     
@@ -310,8 +619,8 @@ def main():
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     
-    # Set device
-    device = "cuda" if args.cuda and torch.cuda.is_available() else "cpu"
+    # Always use GPU if available
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     
     # Get model class and instantiate model
@@ -320,7 +629,8 @@ def main():
         n_input=1,
         hidden_dim=args.hidden_dim,
         n_layers=args.num_layers,
-        n_output=get_num_classes()
+        n_output=get_num_classes(),
+        dropout=args.dropout
     )
     model.to(device)
     
@@ -346,6 +656,39 @@ def main():
     save_dir = os.path.join(config.EXPERIMENTS_FOLDER, config.DATASET, args.model.lower())
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, 'best_model.pth')
+    
+    # Perform grid search if requested
+    if args.grid_search:
+        best_config = grid_search(
+            model_class=model_class,
+            train_loader=train_loader,
+            val_loader=val_loader,
+            save_dir=save_dir
+        )
+        
+        # Update model with best hyperparameters
+        model = model_class(
+            n_input=1,
+            hidden_dim=best_config["hidden_dim"],
+            n_layers=best_config["num_layers"],
+            n_output=get_num_classes(),
+            dropout=best_config.get("dropout", 0.0)
+        )
+        model.to(device)
+        
+        # Update args with best hyperparameters
+        args.lr = best_config["lr"]
+        args.wd = best_config["weight_decay"]
+        args.hidden_dim = best_config["hidden_dim"]
+        args.num_layers = best_config["num_layers"]
+        args.dropout = best_config.get("dropout", 0.0)
+        
+        print(f"Updated model with best hyperparameters:")
+        print(f"  Learning rate: {args.lr}")
+        print(f"  Weight decay: {args.wd}")
+        print(f"  Hidden dimension: {args.hidden_dim}")
+        print(f"  Number of GRU layers: {args.num_layers}")
+        print(f"  Dropout: {args.dropout}")
     
     # Train
     if args.train:

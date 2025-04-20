@@ -71,6 +71,8 @@ results/
 checkpoints/
 runs/
 logs/
+*.pt
+*.pth
 
 # IDE files
 .idea/
@@ -83,4 +85,7 @@ logs/
 Thumbs.db
 
 # Custom project ignores
-**/lightning_logs/ 
+**/lightning_logs/
+*.csv
+/tmp/
+/ray_results/ 

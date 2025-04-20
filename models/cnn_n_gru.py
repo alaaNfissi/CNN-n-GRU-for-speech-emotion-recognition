@@ -3,36 +3,16 @@
 
 # author: Alaa Nfissi
 
-import os
-from functools import partial
+# Import common modules from centralized location
+from utils.common_imports import (
+    torch, nn, F, random
+)
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchaudio
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import IPython.display as ipd
-from tqdm.notebook import tqdm
-import math
-from sklearn.metrics import confusion_matrix
-import seaborn as sn
-torch.manual_seed(0)
-from ray import tune
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler
-import random
-
-from torch import cuda
-import gc
-import inspect
+# Set seed for reproducibility
 random.seed(1234)
 
 class CNN3GRU(nn.Module):
-    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=3):
+    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=3, dropout=0.0):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
@@ -50,9 +30,10 @@ class CNN3GRU(nn.Module):
         self.fc1 = nn.Linear(2*n_channel, n_channel)
         self.relu3 = nn.LeakyReLU()
         
-        self.gru1 = nn.GRU(n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=0)
+        self.gru1 = nn.GRU(n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=dropout if n_layers > 1 else 0)
         self.fc2 = nn.Linear(hidden_dim, n_output)
         self.relu4 = nn.LeakyReLU()
+        self.dropout = nn.Dropout(dropout)
        
 
     def forward(self, x, h):
@@ -69,9 +50,8 @@ class CNN3GRU(nn.Module):
         x = self.fc1(self.relu3(x))
         
         x, h = self.gru1(x, h)
-        x = self.fc2(self.relu4(x[:,-1]))
-        
-        #x = self.rnn(x)
+        x = self.dropout(self.relu4(x[:,-1]))
+        x = self.fc2(x)
         
         return F.log_softmax(x, dim=1), h
     
@@ -82,7 +62,7 @@ class CNN3GRU(nn.Module):
 
 
 class CNN5GRU(nn.Module):
-    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=5):
+    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=5, dropout=0.0):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
@@ -114,9 +94,10 @@ class CNN5GRU(nn.Module):
         self.fc1 = nn.Linear(4 * n_channel, 2*n_channel)
         self.relu5 = nn.LeakyReLU()
         
-        self.gru1 = nn.GRU(2*n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=0)
+        self.gru1 = nn.GRU(2*n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=dropout if n_layers > 1 else 0)
         self.fc2 = nn.Linear(hidden_dim, n_output)
         self.relu6 = nn.LeakyReLU()
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, h):
         x = self.conv1(x)
@@ -140,7 +121,8 @@ class CNN5GRU(nn.Module):
         x = self.fc1(self.relu5(x))
         
         x, h = self.gru1(x, h)
-        x = self.fc2(self.relu6(x[:,-1]))
+        x = self.dropout(self.relu6(x[:,-1]))
+        x = self.fc2(x)
         
         return F.log_softmax(x, dim=1), h
 
@@ -152,7 +134,7 @@ class CNN5GRU(nn.Module):
 
 
 class CNN11GRU(nn.Module):
-    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=11):
+    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=11, dropout=0.0):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
@@ -208,9 +190,10 @@ class CNN11GRU(nn.Module):
         self.fc1 = nn.Linear(8 * n_channel, 4 * n_channel)
         self.relu11 = nn.LeakyReLU()
         
-        self.gru1 = nn.GRU(4*n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=0)
+        self.gru1 = nn.GRU(4*n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=dropout if n_layers > 1 else 0)
         self.fc2 = nn.Linear(hidden_dim, n_output)
         self.relu12 = nn.LeakyReLU()
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, h):
         x = self.conv1(x)
@@ -255,7 +238,8 @@ class CNN11GRU(nn.Module):
         x = self.fc1(self.relu11(x))
         
         x, h = self.gru1(x, h)
-        x = self.fc2(self.relu12(x[:,-1]))
+        x = self.dropout(self.relu12(x[:,-1]))
+        x = self.fc2(x)
         
         return F.log_softmax(x, dim=1), h
     
@@ -266,7 +250,7 @@ class CNN11GRU(nn.Module):
 
 
 class CNN18GRU(nn.Module):
-    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=18):
+    def __init__(self, n_input, hidden_dim, n_layers, n_output=None, stride=4, n_channel=18, dropout=0.0):
         super().__init__()
         
         self.hidden_dim = hidden_dim
@@ -351,9 +335,10 @@ class CNN18GRU(nn.Module):
         self.fc1 = nn.Linear(8 * n_channel, 4 * n_channel)
         self.relu18 = nn.LeakyReLU()
         
-        self.gru1 = nn.GRU(4 * n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=0)
+        self.gru1 = nn.GRU(4 * n_channel, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=dropout if n_layers > 1 else 0)
         self.fc2 = nn.Linear(hidden_dim, n_output)
         self.relu19 = nn.LeakyReLU()
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, h):
         x = self.conv1(x)
@@ -419,7 +404,8 @@ class CNN18GRU(nn.Module):
         x = self.fc1(self.relu18(x))
         
         x, h = self.gru1(x, h)
-        x = self.fc2(self.relu19(x[:,-1]))
+        x = self.dropout(self.relu19(x[:,-1]))
+        x = self.fc2(x)
         
         return F.log_softmax(x, dim=1), h
     

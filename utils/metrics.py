@@ -3,12 +3,10 @@
 
 # author: Alaa Nfissi
 
-import torch
-import numpy as np
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sn
-import sys
+# Import common modules from centralized location
+from utils.common_imports import (
+    torch, np, confusion_matrix, plt, sn, sys
+)
 
 def nr_of_right(pred, target):
     """Count the number of correct predictions"""

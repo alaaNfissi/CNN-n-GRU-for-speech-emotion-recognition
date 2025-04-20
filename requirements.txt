@@ -7,5 +7,11 @@ matplotlib>=3.3.0
 seaborn>=0.11.0
 scikit-learn>=0.24.0
 tqdm>=4.50.0
-ray>=1.0.0
-ipython>=7.0.0 
+ray[tune]>=1.0.0
+ipython>=7.0.0
+
+# Optional dependencies for development
+pytest>=6.0.0
+black>=21.5b2
+isort>=5.9.0
+flake8>=3.9.0 
