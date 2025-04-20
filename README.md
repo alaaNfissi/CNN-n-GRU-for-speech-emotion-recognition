@@ -255,7 +255,7 @@ The best model configuration will be saved to the experiments directory and can 
 python -m main --model cnn3gru --test --load_checkpoint experiments/tess/cnn3gru/best_model.pth
 ```
 
-For larger datasets or more complex models, you may want to reduce the search space by modifying the `grid_search` function in `main.py`.
+For larger datasets or more complex models, you can modify the `grid_search` function in `main.py` to customize the hyperparameter search.
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

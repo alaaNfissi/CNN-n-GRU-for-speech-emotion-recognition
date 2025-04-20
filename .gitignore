@@ -66,7 +66,12 @@ data/
 datasets/
 
 # Experiment results
-experiments/
+# Keep the directory structure but ignore contents
+experiments/*
+!experiments/.gitkeep
+!experiments/*/
+experiments/*/*
+!experiments/*/.gitkeep
 results/
 checkpoints/
 runs/
